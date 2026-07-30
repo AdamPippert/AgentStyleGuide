@@ -1,0 +1,11 @@
+{
+  "flesch_reading_ease": 65.3,
+  "flesch_kincaid_grade": 6.9,
+  "mean_sentence_words": 10.9,
+  "passive_voice_pct": 4.3,
+  "xref_integrity_pct": 100.0,
+  "addressable_rules_pct": 98.6,
+  "unresolved_anaphora_per_kw": 1.13,
+  "term_drift_count": 0.0,
+  "structure_complete_pct": 100.0
+}

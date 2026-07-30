@@ -1,0 +1,54 @@
+name: release-guard
+
+# Backstop, not the primary control. Stripping happens in
+# tools/release-github.sh before the push; by the time this runs, anything
+# internal is already in GitHub's history. This exists to make that failure
+# loud rather than silent, and to catch a push that bypassed the script.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: No internal infrastructure detail
+        run: ./tools/scan-internal.sh
+
+      - name: No agent attribution in history
+        run: |
+          if git log --format='%B' | grep -qiE 'co-authored-by:.*(claude|anthropic|copilot|gpt)'; then
+            echo "::error::commit history contains agent attribution"
+            git log --format='%h %s' --grep='co-authored-by' -i
+            exit 1
+          fi
+          echo "no agent trailers in history"
+
+      - name: Commit identity
+        run: |
+          bad=$(git log --format='%an <%ae>|%cn <%ce>' \
+                | grep -v '^Adam Pippert <adam.pippert@gmail.com>|Adam Pippert <adam.pippert@gmail.com>$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::unexpected commit identity"
+            echo "$bad"
+            exit 1
+          fi
+          echo "all commits authored and committed by Adam Pippert"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Repository obeys its own standard
+        run: ./tools/check.sh

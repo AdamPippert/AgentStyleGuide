@@ -1,0 +1,4 @@
+# Nothing generated lives here yet. Sources are pinned deliberately.
+.DS_Store
+__pycache__/
+*.pyc
